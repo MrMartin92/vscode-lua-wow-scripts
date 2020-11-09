@@ -143,6 +143,12 @@ function write_structure(f, namespace, structure)
     f:write(structure.Name.." = {}\n\n")
 end
 
+function write_warning_automated(f)
+    f:write("-- !!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!\n")
+    f:write("-- This file is automaticly generated. Don't edit manualy!\n")
+    f:write("-- !!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!\n\n")
+end
+
 function APIDocumentation:AddDocumentationTable(target)
     local filename = string.match(last_file, ".+/(.+)Documentation.lua")
 
@@ -153,6 +159,8 @@ function APIDocumentation:AddDocumentationTable(target)
     end
 
     local f = io.open(result_folder..filename, "w+")
+
+    write_warning_automated(f)
     
     if target.Namespace and not already_defined[target.Namespace] then
         already_defined[target.Namespace] = true
