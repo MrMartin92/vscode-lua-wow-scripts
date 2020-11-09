@@ -1,5 +1,7 @@
 local folder_path = "/home/tobias/Downloads/9.0.1.36372/Blizzard_APIDocumentation/"
 local result_folder = "../vscode-lua-wow/API/"
+local last_file
+local already_defined = {}
 
 -- Dummys ----------------------------------------------------------------------
 
@@ -49,7 +51,7 @@ function get_folder_content(path)
         else
             table.insert(content, path..line)
         end   
-    end -- for loop
+    end
   
     f:close()
 
@@ -142,27 +144,36 @@ function write_structure(f, namespace, structure)
 end
 
 function APIDocumentation:AddDocumentationTable(target)
-    if target.Name == nil then
+    local filename = string.match(last_file, ".+/(.+)Documentation.lua")
+
+    if filename then
+        filename = filename .. ".lua"
+    else
         return
     end
 
-    local f = io.open(result_folder..target.Name..".lua", "w+")
+    local f = io.open(result_folder..filename, "w+")
     
-    if target.Namespace then
+    if target.Namespace and not already_defined[target.Namespace] then
+        already_defined[target.Namespace] = true
         f:write("---@class "..target.Namespace.."\n")
         f:write(target.Namespace .. " = {}\n\n")
     end
 
-    for key, value in pairs(target.Functions) do
-        write_function_emmylua(f, target.Namespace, value)
-        write_function_prototype(f, target.Namespace, value)
+    if target.Functions then
+        for key, value in pairs(target.Functions) do
+            write_function_emmylua(f, target.Namespace, value)
+            write_function_prototype(f, target.Namespace, value)
+        end
     end
 
-    for key, value in pairs(target.Tables) do
-        if value.Type == "Structure" then
-            write_structure(f, target.Namespace, value)
-        elseif value.Type == "Enumeration" then
-            write_enum(f, target.namespace, value)
+    if target.Tables then
+        for key, value in pairs(target.Tables) do
+            if value.Type == "Structure" then
+                write_structure(f, target.Namespace, value)
+            elseif value.Type == "Enumeration" then
+                write_enum(f, target.namespace, value)
+            end
         end
     end
 
@@ -174,6 +185,7 @@ local files = get_folder_content(folder_path)
 
 for _,file in ipairs(files) do
         if is_lua_file(file) then
+            last_file = file
             dofile(file)
         end
 end
