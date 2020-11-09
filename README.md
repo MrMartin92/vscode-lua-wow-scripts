@@ -1,0 +1,1 @@
+# vscode-lua-wow-scripts
