@@ -124,15 +124,19 @@ function write_function_prototype(f, namespace, func)
 end
 
 function write_enum(f, namepsace, enum)
-    f:write("---@alias "..enum.Name.." number")
-    for key, value in pairs(enum.Fields) do
-        f:write("|\"enum."..enum.Name.."."..value.Name.."\"")
+    if not already_defined[enum.Name] then
+        already_defined[enum.Name] = true
+        f:write("---@alias "..enum.Name.." number")
+        for key, value in pairs(enum.Fields) do
+            f:write("|\"Enum."..enum.Name.."."..value.Name.."\"")
+        end
+        --f:write("Enum."..enum.Name.." = {}\n")
+        --f:write("\n")
+        --for key, value in pairs(enum.Fields) do
+        --    f:write("Enum."..enum.Name.."."..value.Name.." = "..value.EnumValue.."\n")
+        --end
+        f:write("\n\n")
     end
-    f:write("\n")
-    for key, value in pairs(enum.Fields) do
-        f:write("enum."..enum.Name.."."..value.Name.." = "..value.EnumValue.."\n")
-    end
-    f:write("\n\n")
 end
 
 function write_structure(f, namespace, structure)
